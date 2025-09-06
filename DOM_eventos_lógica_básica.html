@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interatividade com JavaScript: Botão e Campo de Texto</title>
+  <style>
+    /* =====================================================
+       DEFINIÇÃO DE VARIÁVEIS DE COR PARA O TEMA CLARO
+       ===================================================== */
+    :root {
+      --bg: #ffffff;   /* cor de fundo no tema claro */
+      --fg: #111111;   /* cor do texto no tema claro */
+      --card: #f5f5f5; /* fundo dos cartões (seções) */
+      --border: #dddddd; /* cor das bordas */
+    }
+
+    /* =====================================================
+       QUANDO O BODY TEM A CLASSE .dark → APLICAR TEMA ESCURO
+       ===================================================== */
+    body.dark {
+      --bg: #0f172a;   /* fundo no escuro */
+      --fg: #e5e7eb;   /* cor do texto no escuro */
+      --card: #111827; /* fundo dos cartões no escuro */
+      --border: #1f2937; /* bordas no escuro */
+    }
+
+    /* =====================================================
+       ESTILOS BASE
+       ===================================================== */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, Arial, sans-serif;
+      background: var(--bg); /* usa a variável definida acima */
+      color: var(--fg);      /* idem para o texto */
+      transition: background .2s ease, color .2s ease; /* anima a troca de tema */
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 12px; font-size: 1.5rem; }
+
+    /* =====================================================
+       CARTÕES DE CONTEÚDO
+       ===================================================== */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 12px;
+    }
+
+    /* =====================================================
+       LINHAS FLEXÍVEIS PARA AGRUPAR ELEMENTOS
+       ===================================================== */
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .field { gap: 8px; } /* usado na linha do input */
+
+    /* =====================================================
+       ESTILO DO BOTÃO
+       ===================================================== */
+    .btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+    }
+    /* Destaque visual quando recebe foco via teclado (acessibilidade) */
+    .btn:focus { outline: 3px solid #60a5fa; outline-offset: 2px; }
+
+    /* =====================================================
+       STATUS (mensagens dinâmicas)
+       ===================================================== */
+    .status { display:inline-block; padding:4px 8px; border-radius:8px; background:#e5e7eb; }
+    body.dark .status { background:#374151; } /* muda a cor no tema escuro */
+
+    /* =====================================================
+       INPUT DE TEXTO
+       ===================================================== */
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      min-width: 220px;
+      background:#fff;
+      color:#111;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>DOM + Eventos: do clique à ação</h1>
+
+    <!-- =====================================================
+         SLIDE 8: BOTÃO INTERATIVO (CLARO/ESCURO)
+         ===================================================== -->
+    <section class="card" aria-labelledby="sec-toggle">
+      <h2 id="sec-toggle">Botão que alterna a cor de fundo</h2>
+      <p>Ao clicar, alternamos entre tema claro e escuro usando uma classe no &lt;body&gt;.</p>
+
+      <div class="row" style="margin-top:8px">
+        <!-- Botão principal -->
+        <!-- aria-pressed indica se o botão está ativo (true/false) -->
+        <!-- aria-label descreve a ação do botão para leitores de tela -->
+        <button id="toggleBtn" class="btn" aria-pressed="false" aria-label="Alternar tema">
+          Ativar modo escuro
+        </button>
+
+        <!-- Mensagem de status -->
+        <!-- aria-live="polite" faz com que leitores de tela anunciem mudanças automaticamente -->
+        <span id="status" class="status" aria-live="polite">Tema atual: claro</span>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         SLIDE 9: CAMPO DE TEXTO EM TEMPO REAL
+         ===================================================== -->
+    <section class="card" aria-labelledby="sec-live">
+      <h2 id="sec-live">Campo de texto em tempo real</h2>
+      <p>Ao digitar, atualizamos a mensagem abaixo automaticamente usando o evento <code>input</code>.</p>
+
+      <div class="row field" style="margin-top:8px">
+        <!-- Label vinculado ao input -->
+        <label for="msgInput">Digite algo:</label>
+
+        <!-- Input de texto -->
+        <!-- id = usado no JS para manipulação -->
+        <!-- placeholder = dica inicial -->
+        <!-- aria-describedby = conecta ao texto auxiliar abaixo -->
+        <input id="msgInput" type="text" placeholder="Escreva aqui..." aria-describedby="hint" />
+
+        <!-- Texto auxiliar para acessibilidade -->
+        <small id="hint">Cada tecla atualiza a mensagem abaixo.</small>
+      </div>
+
+      <!-- Saída dinâmica -->
+      <!-- aria-live faz leitores de tela anunciarem mudanças no texto -->
+      <p id="output" class="status" aria-live="polite">Você escreveu: (vazio)</p>
+    </section>
+  </main>
+
+  <script>
+  /* =====================================================
+     SLIDE 8: LÓGICA DO BOTÃO INTERATIVO
+     ===================================================== */
+  // Selecionamos os elementos
+  const btn = document.getElementById('toggleBtn');
+  const statusEl = document.getElementById('status');
+
+  // Função que aplica o tema com base no booleano "isDark"
+  function applyTheme(isDark) {
+    // Adiciona ou remove a classe 'dark' no body
+    document.body.classList.toggle('dark', isDark);
+
+    // Atualiza atributos de acessibilidade
+    btn.setAttribute('aria-pressed', String(isDark));
+
+    // Altera o texto do botão conforme o estado
+    btn.textContent = isDark ? 'Voltar ao modo claro' : 'Ativar modo escuro';
+
+    // Atualiza a mensagem de status
+    statusEl.textContent = 'Tema atual: ' + (isDark ? 'escuro' : 'claro');
+
+    // (Opcional) salvar no navegador a preferência do usuário
+    // localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
+
+  // Evento de clique no botão
+  btn.addEventListener('click', () => {
+    // Verifica o estado atual (se o body já tem a classe dark ou não)
+    const isDarkNow = !document.body.classList.contains('dark');
+    // Aplica o tema com base no estado
+    applyTheme(isDarkNow);
+  });
+
+  /* =====================================================
+     SLIDE 9: LÓGICA DO CAMPO DE TEXTO
+     ===================================================== */
+  // Selecionamos input e saída
+  const msgInput = document.getElementById('msgInput');
+  const output = document.getElementById('output');
+
+  // Escutamos o evento "input", que dispara a cada tecla digitada
+  msgInput.addEventListener('input', (e) => {
+    // Pegamos o valor digitado e removemos espaços extras
+    const value = e.target.value.trim();
+
+    // Se houver valor, exibimos o texto; senão, "(vazio)"
+    output.textContent = value ? `Você escreveu: ${value}` : 'Você escreveu: (vazio)';
+  });
+
+  // (Opcional) restaurar tema salvo do localStorage
+  // const saved = localStorage.getItem('theme');
+  // if (saved) applyTheme(saved === 'dark');
+  </script>
+</body>
+</html>

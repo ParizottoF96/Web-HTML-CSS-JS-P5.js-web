@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Aula 4 – p5.js: formas, animações e interações</title>
+  <!-- Carrega a biblioteca p5.js (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <style>
+    /* Estilos só para a página (fora do canvas) */
+    body { margin: 0; font-family: system-ui, Arial, sans-serif; background: #0f172a; color: #e5e7eb; }
+    .ui {
+      position: fixed; inset: 0 auto auto 0; padding: 12px 16px; background: rgba(0,0,0,.35);
+      border-bottom-right-radius: 12px; font-size: 14px; line-height: 1.3;
+      backdrop-filter: blur(4px);
+    }
+    .ui code { background: rgba(255,255,255,.12); padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <!-- Painel de ajuda para a aula -->
+  <div class="ui">
+    <div><strong>Controles</strong></div>
+    <div>🖱️ Cor = posição do mouse (<code>mouseX</code>, <code>mouseY</code>)</div>
+    <div>⬆️/⬇️ Tamanho do círculo</div>
+    <div>⬅️/➡️ Velocidade de pulso</div>
+  </div>
+
+  <script>
+    // ==========================
+    // VARIÁVEIS DE ESTADO
+    // ==========================
+    let baseSize = 80;        // tamanho base do círculo (pode ser ajustado via teclado)
+    let pulse = 0;            // acumulador para animar um "pulso" no tamanho
+    let pulseSpeed = 0.05;    // velocidade do pulso (ajustada com setas esquerda/direita)
+
+    // --------------------------
+    // setup(): roda 1x no início
+    // --------------------------
+    function setup() {
+      // Cria uma "tela" (canvas) 640x480. width e height ficam disponíveis globalmente.
+      createCanvas(640, 480);
+
+      // Modo de desenho: centralizar formas a partir do centro (facilita posicionar o círculo)
+      ellipseMode(CENTER);
+
+      // Desenha borda suave (antialiasing) – padrão já é true, mas mantemos por clareza
+      smooth();
+    }
+
+    // --------------------------
+    // draw(): roda em loop (~60 FPS)
+    // Tudo que está aqui é redesenhado continuamente.
+    // --------------------------
+    function draw() {
+      // Fundo da tela: um cinza claro para destacar as cores do círculo
+      background(240);
+
+      // ==========================
+      // 1) COR SENSÍVEL AO MOUSE
+      // ==========================
+      // map(valor, minOrigem, maxOrigem, minDestino, maxDestino)
+      // Traduz a posição do mouse (0..width/height) para 0..255 (intervalo de cor RGB).
+      const r = map(mouseX, 0, width,  50, 255);  // mais vermelho ao mover para a direita
+      const g = map(mouseY, 0, height, 50, 255);  // mais verde ao mover para baixo
+      const b = 200;                               // azul fixo para manter paleta agradável
+
+      noStroke();       // sem borda
+      fill(r, g, b);    // cor de preenchimento do círculo
+
+      // ==========================
+      // 2) ANIMAÇÃO DE PULSO
+      // ==========================
+      // Usamos seno para um efeito de pulsação no tamanho (oscilando suavemente).
+      pulse += pulseSpeed;                       // acumula no tempo (controla fase da animação)
+      const pulseOffset = sin(pulse) * 20;       // variação (entre -20 e +20 px)
+      const size = constrain(baseSize + pulseOffset, 20, 300);
+      // constrain(valor, min, max) limita o resultado para evitar valores absurdos.
+
+      // ==========================
+      // 3) DESENHO (FORMA BÁSICA)
+      // ==========================
+      // Desenha um círculo central com o tamanho final (base + pulso)
+      ellipse(width / 2, height / 2, size, size);
+
+      // (Opcional) Título e dicas dentro do próprio canvas
+      drawHUD(size, r, g, b);
+    }
+
+    // --------------------------------------------
+    // keyPressed(): chamado quando uma tecla é pressionada
+    // --------------------------------------------
+    function keyPressed() {
+      // Aumenta/diminui tamanho base com setas ↑ e ↓
+      if (keyCode === UP_ARROW) {
+        baseSize += 10;
+      } else if (keyCode === DOWN_ARROW) {
+        baseSize -= 10;
+      }
+
+      // Aumenta/diminui velocidade do pulso com setas ← e →
+      if (keyCode === LEFT_ARROW) {
+        pulseSpeed -= 0.01;
+      } else if (keyCode === RIGHT_ARROW) {
+        pulseSpeed += 0.01;
+      }
+
+      // Mantém valores em faixas seguras
+      baseSize = constrain(baseSize, 20, 300);
+      pulseSpeed = constrain(pulseSpeed, -0.25, 0.5); // permite pulso "reverso" e bem acelerado
+    }
+
+    // ------------------------------------------------
+    // Função auxiliar para desenhar um HUD informativo
+    // ------------------------------------------------
+    function drawHUD(size, r, g, b) {
+      push();                 // salva estilos atuais
+      noStroke();
+      fill(0, 0, 0, 120);     // retângulo semi-transparente no canto
+      rect(12, 12, 230, 84, 10);
+
+      fill(255);
+      textSize(12);
+      textLeading(16);
+      text(
+        `size: ${size.toFixed(0)} px
+RGB: ${r.toFixed(0)}, ${g.toFixed(0)}, ${b}
+mouse: ${mouseX}, ${mouseY}`,
+        24, 30
+      );
+      pop();                  // restaura estilos
+    }
+  </script>
+</body>
+</html>

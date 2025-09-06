@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web para Todos — Protótipo Responsivo e Acessível</title>
+
+  <!-- ============================
+       CSS: layout, responsividade e acessibilidade visual
+       ============================ -->
+  <style>
+    /* --------- Reset/base acessível --------- */
+    *, *::before, *::after { box-sizing: border-box; }
+    html:focus-within { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.6;
+      color: #0b1220;           /* alto contraste no texto */
+      background: #f7f7fb;      /* fundo claro e neutro */
+    }
+
+    /* Link “pular para o conteúdo” melhora navegação por teclado/leitores de tela */
+    .skip-link {
+      position: absolute; left: -999px; top: 0;
+      background: #0b5; color: #fff; padding: 8px 12px; border-radius: 8px;
+    }
+    .skip-link:focus { left: 12px; top: 12px; outline: 3px solid #083; }
+
+    /* Foco visível em todos elementos interativos */
+    :focus { outline: 3px solid #2563eb; outline-offset: 2px; }
+
+    /* --------- Cabeçalho --------- */
+    header {
+      background: #0f172a;      /* azul bem escuro */
+      color: #e5e7eb;           /* cinza claro */
+    }
+    .container {
+      max-width: 1080px; margin: 0 auto; padding: 16px;
+    }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;
+    }
+    .brand-logo {
+      width: 36px; height: 36px; border-radius: 8px; background: #22c55e; display: inline-block;
+    }
+    .brand-name { font-weight: 700; font-size: 1.1rem; letter-spacing: .2px; }
+
+    /* Botão hambúrguer (mobile) */
+    .menu-toggle {
+      background: transparent; border: 1px solid #334155; color: #e5e7eb;
+      padding: 8px 12px; border-radius: 10px; cursor: pointer;
+    }
+
+    /* Navegação */
+    nav { margin-top: 12px; }
+    .nav-list {
+      list-style: none; padding: 0; margin: 0;
+      display: none;               /* mobile: começa fechado */
+      flex-direction: column; gap: 8px;
+    }
+    .nav-list a {
+      color: #e5e7eb; text-decoration: none; padding: 8px 10px; border-radius: 8px;
+    }
+    .nav-list a:focus, .nav-list a:hover {
+      background: #1f2937;
+    }
+
+    /* --------- Main / Hero --------- */
+    .hero {
+      display: grid; gap: 20px;
+      grid-template-columns: 1fr;
+      padding-block: 24px;
+    }
+    .hero h1 { margin: 0 0 8px; font-size: clamp(1.6rem, 2.5vw, 2.2rem); }
+    .hero p { margin: 0; color: #334155; }
+    .hero-cta {
+      display: inline-block; margin-top: 12px;
+      background: #2563eb; color: white; text-decoration: none;
+      padding: 10px 16px; border-radius: 10px; border: 1px solid #1d4ed8;
+    }
+    .hero-cta:hover, .hero-cta:focus { background: #1d4ed8; }
+
+    .hero-figure {
+      border: 1px solid #e2e8f0; background: white; border-radius: 14px; overflow: hidden;
+    }
+    .hero-figure img {
+      display: block; width: 100%; height: auto;
+    }
+    .hero-figure figcaption {
+      padding: 10px 12px; font-size: .95rem; color: #475569; background: #f8fafc;
+    }
+
+    /* --------- Cards de conteúdo --------- */
+    .grid {
+      display: grid; gap: 16px; margin-top: 24px;
+      grid-template-columns: 1fr;       /* mobile first */
+    }
+    .card {
+      background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;
+    }
+    .card h3 { margin: 6px 0 8px; font-size: 1.1rem; }
+    .card p  { margin: 0; color: #475569; }
+
+    /* --------- Rodapé --------- */
+    footer { margin-top: 32px; background: #0f172a; color: #cbd5e1; }
+    .footer-inner { display: grid; gap: 12px; padding-block: 20px; }
+    .footer-inner a { color: #93c5fd; }
+
+    /* --------- Media queries (responsividade) --------- */
+    @media (min-width: 720px) {
+      .hero { grid-template-columns: 1.1fr .9fr; align-items: center; }
+      .nav-list { display: flex !important; flex-direction: row; gap: 16px; } /* desktop: sempre visível */
+      .menu-toggle { display: none; } /* some o hambúrguer */
+      .grid { grid-template-columns: repeat(3, 1fr); }
+      nav { margin-top: 0; }
+    }
+
+    /* Respeita usuários que preferem menos movimento */
+    @media (prefers-reduced-motion: reduce) {
+      html:focus-within { scroll-behavior: auto; }
+      * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Link de salto para acessibilidade por teclado -->
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo principal</a>
+
+  <!-- ============================
+       HEADER com navegação
+       ============================ -->
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <!-- Marca (usa <a> para permitir foco/voltar ao topo) -->
+        <a href="#" class="brand">
+          <span class="brand-logo" aria-hidden="true"></span>
+          <span class="brand-name">Web para Todos</span>
+        </a>
+
+        <!-- Botão hambúrguer: visível no mobile -->
+        <!-- aria-controls aponta para o id da lista; aria-expanded descreve estado -->
+        <button class="menu-toggle"
+                id="menuToggle"
+                aria-controls="navList"
+                aria-expanded="false"
+                aria-label="Abrir menu de navegação">
+          ☰ Menu
+        </button>
+      </div>
+
+      <!-- Navegação primária (landmark <nav>) -->
+      <nav aria-label="Navegação primária">
+        <ul id="navList" class="nav-list">
+          <li><a href="#conteudo">Início</a></li>
+          <li><a href="#boas-praticas">Boas práticas</a></li>
+          <li><a href="#contato">Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================
+       MAIN: conteúdo principal
+       ============================ -->
+  <main id="conteudo" class="container" tabindex="-1"><!-- tabindex -1: destino do skip-link -->
+    <!-- Seção “hero” (texto + imagem com alt) -->
+    <section class="hero" aria-labelledby="titulo-hero">
+      <div>
+        <h1 id="titulo-hero">Protótipos responsivos e acessíveis: do rascunho à experiência</h1>
+        <p>Neste protótipo, aplicamos HTML semântico, Flexbox, media queries e práticas de acessibilidade (texto alternativo, foco visível e navegação por teclado).</p>
+        <a class="hero-cta" href="#boas-praticas">Ver boas práticas</a>
+      </div>
+
+      <!-- figure semântica + alt descritivo -->
+      <figure class="hero-figure">
+        <img src="https://picsum.photos/id/1015/800/520"
+             alt="Interface exibida em laptop e smartphone, demonstrando adaptação responsiva do layout." width="800" height="520" />
+        <figcaption>Imagem representativa de layout que se adapta a diferentes telas.</figcaption>
+      </figure>
+    </section>
+
+    <!-- Cards explicando os pilares -->
+    <section id="boas-praticas" aria-labelledby="titulo-praticas" class="grid">
+      <h2 id="titulo-praticas" class="sr-only" style="position:absolute;left:-9999px;">Boas práticas</h2>
+      <article class="card">
+        <h3>HTML Semântico</h3>
+        <p>Use landmarks como <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code> para orientar tecnologias assistivas.</p>
+      </article>
+      <article class="card">
+        <h3>Responsividade</h3>
+        <p>Comece mobile first. Organize com <strong>Flexbox/Grid</strong> e ajuste com <code>@media</code> queries.</p>
+      </article>
+      <article class="card">
+        <h3>Acessibilidade</h3>
+        <p>Forneça foco visível, texto alternativo em imagens, boa hierarquia de títulos e rótulos/descrições.</p>
+      </article>
+    </section>
+  </main>
+
+  <!-- ============================
+       FOOTER
+       ============================ -->
+  <footer role="contentinfo" id="contato">
+    <div class="container footer-inner">
+      <div>
+        <strong>Web para Todos</strong><br/>
+        Protótipo educacional — RA1 • IDs 1.1–1.8
+      </div>
+      <div>
+        <strong>Contato</strong><br/>
+        <a href="mailto:contato@exemplo.edu.br">contato@exemplo.edu.br</a>
+      </div>
+      <div>
+        <strong>Créditos de imagem</strong><br/>
+        Foto ilustrativa via Picsum.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================
+       JavaScript: menu acessível e pequenos aprimoramentos
+       ============================ -->
+  <script>
+    // Seletores
+    const toggle = document.getElementById('menuToggle');
+    const navList = document.getElementById('navList');
+
+    // Estado do menu (apenas para mobile; em desktop o menu fica sempre visível via CSS)
+    function setMenu(open) {
+      // Mostra/esconde lista
+      navList.style.display = open ? 'flex' : 'none';
+      // Atualiza atributos de acessibilidade
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+    }
+
+    // Inicialização: garante fechado no mobile
+    setMenu(false);
+
+    // Clique no botão hambúrguer
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'false';
+      setMenu(open);
+    });
+
+    // Fechar menu ao navegar por link (melhora UX no mobile)
+    navList.addEventListener('click', (e) => {
+      const isLink = e.target.tagName === 'A';
+      if (isLink && window.matchMedia('(max-width: 719px)').matches) {
+        setMenu(false);
+        // Move foco para o conteúdo principal, reforçando navegação por teclado
+        document.getElementById('conteudo').focus();
+      }
+    });
+
+    // Acessibilidade extra: fechar menu com Esc
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setMenu(false);
+        toggle.focus();
+      }
+    });
+  </script>
+</body>
+</html>
